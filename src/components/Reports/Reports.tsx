@@ -6,7 +6,7 @@ import { Badge } from '../ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Download, FileText, TrendingUp, Package, Bug } from 'lucide-react';
-import { BarChart, Bar, LineChart, Line, ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, Line, ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const weeklyProductionData = [
   { week: 'Week 1', indoor: 2400, outdoor: 4200, total: 6600 },
@@ -15,12 +15,15 @@ const weeklyProductionData = [
   { week: 'Week 4', indoor: 3200, outdoor: 5200, total: 8400 }
 ];
 
-const indoorStage8Data = [
-  { month: 'Jan', stage8: 2150 },
-  { month: 'Feb', stage8: 2280 },
-  { month: 'Mar', stage8: 2395 },
-  { month: 'Apr', stage8: 2610 },
-  { month: 'May', stage8: 2755 }
+const indoorMonthlyData = [
+  { stage: 'Stage 1', count: 4200 },
+  { stage: 'Stage 2', count: 3850 },
+  { stage: 'Stage 3', count: 3520 },
+  { stage: 'Stage 4', count: 3180 },
+  { stage: 'Stage 5', count: 2950 },
+  { stage: 'Stage 6', count: 2720 },
+  { stage: 'Stage 7', count: 2480 },
+  { stage: 'Stage 8', count: 2280 }
 ];
 
 const outdoorMovementData = [
@@ -47,16 +50,6 @@ const salesSummary = [
 ];
 
 export function Reports() {
-  const totalOutdoorTransfers = outdoorMovementData.reduce((sum, item) => sum + item.monthlyTransfers, 0);
-  const avgMortalityRate = Math.round(
-    (outdoorMovementData.reduce((sum, item) => sum + item.mortality, 0) / outdoorMovementData.length)
-  );
-  const outdoorSnapshot = outdoorMovementData[outdoorMovementData.length - 1];
-
-  const totalInventoryStock = inventorySupplierSummary.reduce((sum, item) => sum + item.inventory, 0);
-  const totalSupplierDeliveries = inventorySupplierSummary.reduce((sum, item) => sum + item.supplier, 0);
-  const netAvailability = totalInventoryStock - totalSupplierDeliveries;
-
   return (
     <div className="p-6 space-y-6">
       {/* Report Filters */}
@@ -112,7 +105,7 @@ export function Reports() {
           <Tabs defaultValue="production">
             <TabsList className="mb-6">
               <TabsTrigger value="production">Weekly Production</TabsTrigger>
-              <TabsTrigger value="indoor">Indoor Monthly (Stage 8)</TabsTrigger>
+              <TabsTrigger value="indoor">Indoor Monthly</TabsTrigger>
               <TabsTrigger value="outdoor">Outdoor Movement</TabsTrigger>
               <TabsTrigger value="sales">Sales Summary</TabsTrigger>
               <TabsTrigger value="inventory">Inventory</TabsTrigger>
@@ -187,50 +180,33 @@ export function Reports() {
             <TabsContent value="indoor">
               <div className="space-y-6">
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={indoorStage8Data}>
+                  <BarChart data={indoorMonthlyData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="month" stroke="#6b7280" />
+                    <XAxis dataKey="stage" stroke="#6b7280" />
                     <YAxis stroke="#6b7280" />
                     <Tooltip />
                     <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="stage8"
-                      stroke="#22c55e"
-                      strokeWidth={3}
-                      name="Stage 8 Output"
-                      dot={{ r: 4 }}
-                    />
-                  </LineChart>
+                    <Bar dataKey="count" fill="#22c55e" name="Plant Count" />
+                  </BarChart>
                 </ResponsiveContainer>
 
                 <div className="border rounded-lg overflow-hidden">
                   <table className="w-full">
                     <thead className="bg-gray-50 border-b">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs text-gray-600">Month</th>
-                        <th className="px-4 py-3 text-left text-xs text-gray-600">Stage 8 Output</th>
-                        <th className="px-4 py-3 text-left text-xs text-gray-600">Variance vs Prev.</th>
+                        <th className="px-4 py-3 text-left text-xs text-gray-600">Stage</th>
+                        <th className="px-4 py-3 text-left text-xs text-gray-600">Plant Count</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {indoorStage8Data.map((item, index) => {
-                        const previousStage8 = index === 0 ? item.stage8 : indoorStage8Data[index - 1].stage8;
-                        const variance = item.stage8 - previousStage8;
-                        const formattedVariance = `${variance >= 0 ? '+' : ''}${variance.toLocaleString()}`;
-
-                        return (
+                      {indoorMonthlyData.map((item, index) => (
                         <tr key={index} className="border-b hover:bg-gray-50">
-                          <td className="px-4 py-3 text-sm">{item.month}</td>
+                          <td className="px-4 py-3 text-sm">{item.stage}</td>
                           <td className="px-4 py-3 text-sm">
-                            {item.stage8.toLocaleString()}
-                          </td>
-                          <td className={`px-4 py-3 text-sm ${variance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {formattedVariance}
+                            {item.count.toLocaleString()}
                           </td>
                         </tr>
-                        );
-                      })}
+                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -358,37 +334,6 @@ export function Reports() {
             {/* Outdoor Movement Report */}
             <TabsContent value="outdoor">
               <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <Card className="bg-green-50 border-green-200">
-                    <CardContent className="p-4">
-                      <p className="text-xs text-green-700 mb-1">YTD Transfers</p>
-                      <p className="text-2xl font-semibold text-green-900">{totalOutdoorTransfers.toLocaleString()}</p>
-                      <p className="text-xs text-green-600">Plants moved through outdoor modules</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-blue-50 border-blue-200">
-                    <CardContent className="p-4">
-                      <p className="text-xs text-blue-700 mb-1">Primary Hardening</p>
-                      <p className="text-2xl font-semibold text-blue-900">{outdoorSnapshot.primaryHardening.toLocaleString()}</p>
-                      <p className="text-xs text-blue-600">Latest month throughput</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-purple-50 border-purple-200">
-                    <CardContent className="p-4">
-                      <p className="text-xs text-purple-700 mb-1">Holding Area</p>
-                      <p className="text-2xl font-semibold text-purple-900">{outdoorSnapshot.holdingArea.toLocaleString()}</p>
-                      <p className="text-xs text-purple-600">Plants awaiting dispatch</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-amber-50 border-amber-200">
-                    <CardContent className="p-4">
-                      <p className="text-xs text-amber-700 mb-1">Avg Mortality</p>
-                      <p className="text-2xl font-semibold text-amber-900">{avgMortalityRate}</p>
-                      <p className="text-xs text-amber-600">Cases per month</p>
-                </CardContent>
-              </Card>
-                </div>
-
                 <ResponsiveContainer width="100%" height={320}>
                   <ComposedChart data={outdoorMovementData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -450,32 +395,6 @@ export function Reports() {
             {/* Inventory Report */}
             <TabsContent value="inventory">
               <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card className="bg-green-50 border-green-200">
-                    <CardContent className="p-4">
-                      <p className="text-xs text-green-700 mb-1">Current Stock (Units)</p>
-                      <p className="text-2xl font-semibold text-green-900">{totalInventoryStock.toLocaleString()}</p>
-                      <p className="text-xs text-green-600">Across key media & hardware</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-blue-50 border-blue-200">
-                    <CardContent className="p-4">
-                      <p className="text-xs text-blue-700 mb-1">Supplier Deliveries</p>
-                      <p className="text-2xl font-semibold text-blue-900">{totalSupplierDeliveries.toLocaleString()}</p>
-                      <p className="text-xs text-blue-600">Received this month</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-amber-50 border-amber-200">
-                    <CardContent className="p-4">
-                      <p className="text-xs text-amber-700 mb-1">Net Availability</p>
-                      <p className={`text-2xl font-semibold ${netAvailability >= 0 ? 'text-amber-900' : 'text-red-700'}`}>
-                        {netAvailability.toLocaleString()}
-                      </p>
-                      <p className="text-xs text-amber-600">Inventory less pending receipts</p>
-                </CardContent>
-              </Card>
-                </div>
-
                 <ResponsiveContainer width="100%" height={320}>
                   <BarChart data={inventorySupplierSummary}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
