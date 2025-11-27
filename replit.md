@@ -14,7 +14,10 @@ The application is built with **React 18.3.1** and **TypeScript**, using **Vite 
 - **Indoor Operations Management**: Modules for media preparation, subculturing, incubation, and quality control.
 - **Outdoor Operations Management**: Functionality for primary/secondary hardening, shifting registers, contamination tracking, fertilization, holding areas, and batch timelines.
 - **Sales & Inventory Management**: An inventory dashboard, sales entry, and sales list.
-- **Reporting**: A comprehensive system for generating various reports.
+- **Reporting**: A comprehensive system for generating various reports including:
+  - Indoor Monthly: Stage 1-8 progress visualization with bar charts
+  - Outdoor Movement: Graph-only view for plant transfers and mortality tracking
+  - Inventory: Graph-only view for stock and supplier delivery tracking
 
 **UI/UX Decisions**:
 - The UI follows a green theme, aligning with the biotech and agriculture industry.
